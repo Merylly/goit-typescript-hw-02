@@ -1,25 +1,27 @@
 import { useEffect, useState } from "react";
-import { fetchGalleryImages } from "./servises/api";
+import { fetchGalleryImages } from "../../servises/api";
 import toast, { Toaster } from "react-hot-toast";
 
-import SearchBar from "./components/SearchBar/SearchBar";
-import Loader from "./components/Loader/Loader";
-import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
-import ImageGallery from "./components/ImageGallery/ImageGallery";
-import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
-import ImageModal from "./components/ImageModal/ImageModal";
+import SearchBar from "../SearchBar/SearchBar";
+import Loader from "../Loader/Loader";
+import LoadMoreBtn from "../LoadMoreBtn/LoadMoreBtn";
+import ImageGallery from "../ImageGallery/ImageGallery";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import ImageModal from "../ImageModal/ImageModal";
+
+import { IImage, IImageModal } from "./App.types";
 
 import css from "./App.module.css";
 
 function App() {
-  const [images, setImages] = useState(null);
-  const [query, setQuery] = useState("");
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [swnLoader, setSwnLoader] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [modalImage, setModalImage] = useState(null);
+  const [images, setImages] = useState<IImage[] | null>([]);
+  const [query, setQuery] = useState<string>("");
+  const [page, setPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [swnLoader, setSwnLoader] = useState<boolean>(false);
+  const [isError, setIsError] = useState<boolean>(false);
+  const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
+  const [modalImage, setModalImage] = useState<IImageModal | null>(null);
 
   useEffect(() => {
     const onSearchPhotos = async () => {
@@ -31,10 +33,13 @@ function App() {
         const data = await fetchGalleryImages(query, page);
 
         if (page === 1) {
-          setImages(data.results);
+          setImages(data.images);
           setTotalPages(data.total_pages);
         } else {
-          setImages((prevImages) => [...prevImages, ...data.results]);
+          setImages((prevImages: IImage[] | null) => [
+            ...(prevImages || []),
+            ...data.images,
+          ]);
         }
       } catch {
         setIsError(true);
@@ -47,7 +52,7 @@ function App() {
     onSearchPhotos();
   }, [query, page]);
 
-  const onHandleSearch = (formData) => {
+  const onHandleSearch = (formData: string) => {
     setPage(1);
     setImages([]);
     setQuery(formData);
@@ -57,7 +62,7 @@ function App() {
     setPage(page + 1);
   };
 
-  const openModal = (images) => {
+  const openModal = (images: IImage) => {
     setModalImage(images);
     setModalIsOpen(true);
   };
